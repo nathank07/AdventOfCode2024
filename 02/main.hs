@@ -36,9 +36,9 @@ safeReport (x1:x2:xs) safety =
         NoneUnsafe -> safe && safeReport (x2:xs) (if x1 < x2 then AscUnsafe else DescUnsafe)
         AscUnsafe  -> safe && safeReport (x2:xs) AscUnsafe
         DescUnsafe -> safe && safeReport (x2:xs) DescUnsafe
-        None ->       safe && safeReport (x2:xs) (if x1 < x2 then AscSafe else DescSafe) || safeReport (x1:xs) NoneUnsafe || safeReport (x2:xs) NoneUnsafe
-        AscSafe ->    safe && safeReport (x2:xs) AscSafe  || safeReport (x1:xs) AscUnsafe
-        DescSafe ->   safe && safeReport (x2:xs) DescSafe || safeReport (x1:xs) DescUnsafe
+        None       -> safe && safeReport (x2:xs) (if x1 < x2 then AscSafe else DescSafe) || safeReport (x1:xs) NoneUnsafe || safeReport (x2:xs) NoneUnsafe
+        AscSafe    -> safe && safeReport (x2:xs) AscSafe  || safeReport (x1:xs) AscUnsafe
+        DescSafe   -> safe && safeReport (x2:xs) DescSafe || safeReport (x1:xs) DescUnsafe
         where safe = numsSafe x1 x2 safety
 
 
