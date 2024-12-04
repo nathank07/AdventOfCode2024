@@ -32,10 +32,6 @@ getBottomRight searchStr belowStrs = getIdxs idxs belowStrs
 
 getXmas :: [String] -> Int
 getXmas ([]:xss) = getXmas xss
-getXmas [x:xs] = case x of
-    'S' -> getXmas [xs] + if take 3 xs == "AMX" then 1 else 0
-    'X' -> getXmas [xs] + if take 3 xs == "MAS" then 1 else 0
-    _ -> getXmas [xs]
 getXmas ((x:xs):xss) = case x of
     'S' -> getXmas (xs:xss) + across "AMX" + below "AMX" + bottomL "AMX" + bottomR "AMX"
     'X' -> getXmas (xs:xss) + across "MAS" + below "MAS" + bottomL "MAS" + bottomR "MAS"
@@ -46,9 +42,23 @@ getXmas ((x:xs):xss) = case x of
           bottomR str = if getBottomRight (x:xs) xss == str then 1 else 0
 getXmas _ = 0
 
+getXXmas :: [String] -> Int
+getXXmas ([]:xss) = getXXmas xss
+getXXmas ((x:xs):xss) = getXXmas (xs:xss) + isXXMas
+    where isXXMas = case (leftRight, rightLeft) of
+            ("SAM", "SAM") -> 1
+            ("MAS", "SAM") -> 1
+            ("MAS", "MAS") -> 1
+            ("SAM", "MAS") -> 1
+            _ -> 0
+          leftRight = x : take 2 (getBottomRight (x:xs) xss)
+          rightLeft = head (tail xs) : take 2 (getBottomLeft (tail xs) xss)
+
+getXXmas _ = 0
 
 main :: IO()
 main = do
     h <- openFile "input" ReadMode
     x <- readInput h
     print $ getXmas x
+    print $ getXXmas x
