@@ -10,36 +10,31 @@ readInput h = do
             rest <- readInput h
             return $ line : rest
 
-getBelow :: String -> [String] -> String
-getBelow searchStr belowStrs = getIdxs (replicate 3 strLoc) belowStrs
-    where getIdxs (x:xs) (y:ys) = if x >= 0 && x < length y then (y !! x) : getIdxs xs ys else ""
-          getIdxs _ _ = ""
-          strLoc = if length belowStrs > 0 then length (head belowStrs) - length searchStr else 0
 
-getBottomLeft :: String -> [String] -> String
-getBottomLeft searchStr belowStrs = getIdxs idxs belowStrs
-    where idxs = [strLoc - x | x <- [1..3]]
-          getIdxs (x:xs) (y:ys) = if x >= 0 && x < length y then (y !! x) : getIdxs xs ys else ""
-          getIdxs _ _ = ""
-          strLoc = if length belowStrs > 0 then length (head belowStrs) - length searchStr else 0
+data Direction = Across | Below | BelowLeft | BelowRight
 
-getBottomRight :: String -> [String] -> String
-getBottomRight searchStr belowStrs = getIdxs idxs belowStrs
-    where idxs = [strLoc + x | x <- [1..3]]
-          getIdxs (x:xs) (y:ys) = if x >= 0 && x < length y then (y !! x) : getIdxs xs ys else ""
-          getIdxs _ _ = ""
-          strLoc = if length belowStrs > 0 then length (head belowStrs) - length searchStr else 0
+getDirection :: String -> [String] -> Direction -> String
+getDirection searchStr belowStrs Across = take 3 $ drop 1 searchStr
+getDirection searchStr belowStrs direction = getIdxs xs belowStrs
+        where 
+            xs = case direction of
+                    Below -> replicate 3 strLoc
+                    BelowLeft -> [strLoc - x | x <- [1..3]]
+                    BelowRight -> [strLoc + x | x <- [1..3]]
+            strLoc = if length belowStrs > 0 then length (head belowStrs) - length searchStr else 0
+            getIdxs (x:xs) (y:ys) = if x >= 0 && x < length y then (y !! x) : getIdxs xs ys else ""
+            getIdxs _ _ = ""
+        
 
 getXmas :: [String] -> Int
 getXmas ([]:xss) = getXmas xss
 getXmas ((x:xs):xss) = case x of
-    'S' -> getXmas (xs:xss) + across "AMX" + below "AMX" + bottomL "AMX" + bottomR "AMX"
-    'X' -> getXmas (xs:xss) + across "MAS" + below "MAS" + bottomL "MAS" + bottomR "MAS"
+    'S' -> getXmas (xs:xss) + hasCrosswordMatch "AMX"
+    'X' -> getXmas (xs:xss) + hasCrosswordMatch "MAS"
     _ -> getXmas (xs:xss)
-    where below str = if getBelow (x:xs) xss == str then 1 else 0
-          across str = if take 3 xs == str then 1 else 0
-          bottomL str = if getBottomLeft (x:xs) xss == str then 1 else 0
-          bottomR str = if getBottomRight (x:xs) xss == str then 1 else 0
+    where 
+        hasCrosswordMatch s = length $ filter id [fn Across == s, fn Below == s, fn BelowLeft == s, fn BelowRight == s]
+        fn = getDirection (x:xs) xss
 getXmas _ = 0
 
 getXXmas :: [String] -> Int
@@ -51,8 +46,8 @@ getXXmas ((x:xs):xss) = getXXmas (xs:xss) + isXXMas
             ("MAS", "MAS") -> 1
             ("SAM", "MAS") -> 1
             _ -> 0
-          leftRight = x : take 2 (getBottomRight (x:xs) xss)
-          rightLeft = head (tail xs) : take 2 (getBottomLeft (tail xs) xss)
+          leftRight = x : take 2 (getDirection (x:xs) xss BelowRight)
+          rightLeft = head (tail xs) : take 2 (getDirection (tail xs) xss BelowLeft)
 
 getXXmas _ = 0
 
