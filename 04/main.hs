@@ -16,14 +16,14 @@ data Direction = Across | Below | BelowLeft | BelowRight
 getDirection :: String -> [String] -> Direction -> String
 getDirection searchStr belowStrs Across = take 3 $ drop 1 searchStr
 getDirection searchStr belowStrs direction = getIdxs xs belowStrs
-        where
-            xs = case direction of
-                    Below -> replicate 3 strLoc
-                    BelowLeft -> [strLoc - x | x <- [1..3]]
-                    BelowRight -> [strLoc + x | x <- [1..3]]
-            strLoc = if not (null belowStrs) then length (head belowStrs) - length searchStr else 0
-            getIdxs (x:xs) (y:ys) = if x >= 0 && x < length y then (y !! x) : getIdxs xs ys else ""
-            getIdxs _ _ = ""
+    where
+        xs = case direction of
+                Below -> replicate 3 strLoc
+                BelowLeft -> [strLoc - x | x <- [1..3]]
+                BelowRight -> [strLoc + x | x <- [1..3]]
+        strLoc = if not (null belowStrs) then length (head belowStrs) - length searchStr else 0
+        getIdxs (x:xs) (y:ys) = if x >= 0 && x < length y then (y !! x) : getIdxs xs ys else ""
+        getIdxs _ _ = ""
 
 
 getXmas :: [String] -> Int
